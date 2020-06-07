@@ -1,5 +1,5 @@
 import { Application } from "https://deno.land/x/abc@v1.0.0-rc8/mod.ts";
-import { encode, decode } from "https://deno.land/std@0.54.0/encoding/base64.ts";
+import { Base64 } from "https://deno.land/x/bb64/mod.ts";
 
 interface UrlRequest {
     url: string;
@@ -17,7 +17,11 @@ app
         const { url }: UrlRequest = await c.body();
 
         urls.push(url);
-        return encode((urls.length - 1).toString());
+        return Base64.fromString((urls.length - 1).toString()).toString();
+    })
+    .get("/:extension", (context) => {
+        const realURL: string = urls[parseInt(Base64.fromBase64String(context.url.pathname.substr(1)).toString())]
+        return context.redirect(realURL)
     })
     .start({ port: 8080 });
 
